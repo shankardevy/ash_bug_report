@@ -12,8 +12,8 @@ defmodule AshBug.Collab.Conversation do
     defaults [:read, create: :*]
 
     read :list_current_user_conversations do
-      prepare build(load: [:last_read_at])
-      # prepare build(load: [:last_read_at, :unread_count])
+      # prepare build(load: [:last_read_at])
+      prepare build(load: [:last_read_at, :unread_count])
     end
   end
 
@@ -28,6 +28,8 @@ defmodule AshBug.Collab.Conversation do
 
   relationships do
     has_many :messages, Message
+
+    # Every user has only one ConversationRead record per Conversation.
     has_one :conversation_reads, ConversationRead do
       filter expr(user_id == ^actor(:id))
     end
@@ -36,20 +38,17 @@ defmodule AshBug.Collab.Conversation do
   calculations do
     calculate :last_read_at, :utc_datetime, expr(conversation_reads.last_read_at)
 
-    # calculate :unread_count,
-    #           :integer,
-    #           expr(count(messages, query: [filter: expr(inserted_at > parent(last_read_at))]))
+    calculate :unread_count,
+              :integer,
+              expr(count(messages, query: [filter: expr(inserted_at > parent(last_read_at))]))
   end
 
   aggregates do
-    count :unread_count, :messages do
-      filter expr(inserted_at > parent(last_read_at))
-    end
+    # max :last_read_at, :conversation_reads, :last_read_at
+
+    # count :unread_count, :messages do
+    #   filter expr(inserted_at > parent(last_read_at))
+    # end
   end
 
-  #   max :last_read_at, :conversation_reads, :last_read_at
-
-  #   count :unread_count, :messages do
-  #     filter expr(inserted_at > parent(:last_read_at))
-  #   end
 end
