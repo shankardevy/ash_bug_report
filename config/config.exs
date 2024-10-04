@@ -1,6 +1,6 @@
 import Config
 
-config :ash_bug, ecto_repos: [AshBug.Repo]
+config :ash_bug, ecto_repos: [AshBug.Repo], ash_domains: [AshBug.Collab]
 
 config :ash,
   include_embedded_source_by_default?: false,
